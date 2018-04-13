@@ -4,16 +4,15 @@ import org.cuner.spi.framework.client.SpiBase;
 import org.cuner.spi.framework.client.annotation.BizSpi;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by houan on 18/4/9.
  */
+@Component
 public class SpiManager implements ApplicationListener<ContextRefreshedEvent> {
 
     private static Map<Class, List<SpiBase>> spiProviderMap = new ConcurrentHashMap<Class, List<SpiBase>>();
@@ -26,10 +25,12 @@ public class SpiManager implements ApplicationListener<ContextRefreshedEvent> {
 
             for (Object spiInstance : spiInstanceMap.values()) {
                 Class spiInterface = spiInstance.getClass().getInterfaces()[0];
-                if (spiProviderMap.containsKey(spiInterface)) {
+                if (spiProviderMap.containsKey(spiInterface) && spiProviderMap.get(spiInterface).size() > 0) {
                     spiProviderMap.get(spiInterface).add((SpiBase) spiInstance);
                 } else {
-                    spiProviderMap.put(spiInterface, Collections.singletonList((SpiBase) spiInstance));
+                    List<SpiBase> spiProviderList = new ArrayList<SpiBase>();
+                    spiProviderList.add((SpiBase) spiInstance);
+                    spiProviderMap.put(spiInterface, spiProviderList);
                 }
             }
 
